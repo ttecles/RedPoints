@@ -1,13 +1,17 @@
-"""Usage: crawler.py [--timeout=<seconds>] RESOURCE INPUT
+"""Usage: crawler.py [--timeout SECONDS] [--keyword KEYWORD]... [--proxy PROXY]...
+                     [--type TYPE] [--extra] [INPUT]
 
-Collects data from a resource
+Collects data from a resource.
 
 Arguments:
-    RESOURCE  resource to use. Right know, only GITHUB is implemented
     INPUT     JSON file input
 
 Options:
-    --timeout=<seconds> SEC  timeout used for fetching data
+    --timeout SECONDS   SEC  timeout used for fetching data.
+    --keyword KEYWORD   keywords to search for.
+    --proxy PROXY       proxies to use.
+    --type TYPE         type of repository to collect.
+    --extra             extra information. Only valid on Repository type.
 """
 import json
 import os
@@ -19,18 +23,14 @@ from docopt import docopt
 from github_crawler import GitHubCrawler
 
 
-def github_crawler(input_data, timeout):
-    crawler = GitHubCrawler(input_data.get('proxies'), timeout=timeout)
-    data = crawler.fetch_urls(input_data.get('keywords', None), input_data.get('type', None))
+def github_crawler(keywords, proxies, type, timeout=None, extra=False):
+    crawler = GitHubCrawler(proxies, timeout=timeout)
+    data = crawler.fetch_urls(keywords, type, extra)
     return data
 
 
 def main(argv):
     arguments = docopt(__doc__, argv=argv)
-
-    file_input = arguments['INPUT']
-    if not os.path.exists(file_input):
-        raise ValueError("File not found")
 
     timeout = arguments['--timeout']
     if timeout:
@@ -39,14 +39,26 @@ def main(argv):
         except:
             raise ValueError("Invalid timeout value")
 
-    with open(file_input, 'r') as json_file:
-        input_content = json.load(json_file)
+    file_input = arguments['INPUT']
+    if file_input:
+        if not os.path.exists(file_input):
+            raise FileNotFoundError("File not found")
 
-    if arguments['RESOURCE'].lower() == 'github':
-        data = github_crawler(input_content, timeout=timeout)
+        with open(file_input, 'r') as json_file:
+            input_content = json.load(json_file)
     else:
-        data = None
-    return data
+        input_content = {'keywords': [], 'proxies': [], 'type': None}
+
+    if arguments['--keyword']:
+        input_content.update(keywords=arguments['--keyword'])
+    if arguments['--proxy']:
+        input_content.update(proxies=arguments['--proxy'])
+    if arguments['--type']:
+        input_content.update(type=arguments['--type'])
+    if not input_content['type']:
+        input_content['type'] = GitHubCrawler.TYPES[0]
+    return github_crawler(**input_content, timeout=timeout, extra=arguments['--extra'])
+
 
 
 if __name__ == '__main__':

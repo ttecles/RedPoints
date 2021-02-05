@@ -1,3 +1,5 @@
 coverage
 pytest
-responses
+httpx
+lxml
+cssselect
