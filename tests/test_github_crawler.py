@@ -4,7 +4,7 @@ import httpx
 import pytest
 import respx as respx
 
-from github_crawler import GitHubCrawler
+from crawlers import GitHubCrawler
 from tests.html_response import repo_response, issues_response, wikis_response, expected_repo_urls, \
     expected_issues_urls, expected_wikis_urls, expected_repo_urls_extra, dropbox_cloud_storage_response, \
     horizon_dashboard_response, expected_horizon_data
@@ -29,7 +29,7 @@ def test_GithubCrawler_repo(keywords, proxies):
         return_value=httpx.Response(200, html=repo_response))
 
     crawler = GitHubCrawler(proxies)
-    result = crawler.fetch_urls(keywords, 'Repositories')
+    result = crawler.fetch_data(keywords, 'Repositories')
     assert result == expected_repo_urls
 
 
@@ -39,7 +39,7 @@ def test_GithubCrawler_issues(keywords, proxies):
         return_value=httpx.Response(200, html=issues_response))
 
     crawler = GitHubCrawler(proxies)
-    result = crawler.fetch_urls(keywords, 'Issues')
+    result = crawler.fetch_data(keywords, 'Issues')
     assert result == expected_issues_urls
 
 
@@ -49,7 +49,7 @@ def test_GithubCrawler_wikis(keywords, proxies):
         return_value=httpx.Response(200, html=wikis_response))
 
     crawler = GitHubCrawler(proxies)
-    result = crawler.fetch_urls(keywords, 'Wikis')
+    result = crawler.fetch_data(keywords, 'Wikis')
     assert result == expected_wikis_urls
 
 
@@ -62,14 +62,14 @@ def test_GithubCrawler_repo_extra(keywords, proxies):
     respx.get(url=GitHubCrawler.BASE_URL + '/michealbalogun/Horizon-dashboard').mock(
         return_value=httpx.Response(200, html=horizon_dashboard_response))
     crawler = GitHubCrawler(proxies)
-    result = crawler.fetch_urls(keywords, 'Repositories', extra=True)
+    result = crawler.fetch_data(keywords, 'Repositories', extra=True)
     assert result == expected_repo_urls_extra
 
 
 def test_GithubCrawler_invalid_type(keywords, proxies):
     crawler = GitHubCrawler(proxies)
     with pytest.raises(ValueError) as e:
-        crawler.fetch_urls(keywords, 'XXX')
+        crawler.fetch_data(keywords, 'XXX')
 
 
 @respx.mock
@@ -81,7 +81,7 @@ def test_GithubCrawler_repo_extra(keywords, proxies):
     respx.get(url=GitHubCrawler.BASE_URL + '/michealbalogun/Horizon-dashboard').mock(
         return_value=httpx.Response(200, html=horizon_dashboard_response))
     crawler = GitHubCrawler(proxies)
-    result = crawler.fetch_urls(keywords, 'Repositories', extra=True)
+    result = crawler.fetch_data(keywords, 'Repositories', extra=True)
     assert result == [
         {
             "url": "https://github.com/atuldjadhav/DropBox-Cloud-Storage",

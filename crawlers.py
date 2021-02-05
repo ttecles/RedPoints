@@ -20,7 +20,7 @@ class GitHubCrawler:
         self._proxies = proxies
         self.timeout = timeout
 
-    def fetch_urls(self, keywords: t.List[str], type: str, extra=False):
+    def fetch_data(self, keywords: t.List[str], type: str, extra=False):
         if type not in self.TYPES:
             raise ValueError("Not a valid type")
         proxies = random.choice(self._proxies) if self._proxies else None

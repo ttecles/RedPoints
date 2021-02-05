@@ -20,12 +20,12 @@ from pprint import pprint
 
 from docopt import docopt
 
-from github_crawler import GitHubCrawler
+from crawlers import GitHubCrawler
 
 
-def github_crawler(keywords, proxies, type, timeout=None, extra=False):
+def crawlers(keywords, proxies, type, timeout=None, extra=False):
     crawler = GitHubCrawler(proxies, timeout=timeout)
-    data = crawler.fetch_urls(keywords, type, extra)
+    data = crawler.fetch_data(keywords, type, extra)
     return data
 
 
@@ -57,8 +57,7 @@ def main(argv):
         input_content.update(type=arguments['--type'])
     if not input_content['type']:
         input_content['type'] = GitHubCrawler.TYPES[0]
-    return github_crawler(**input_content, timeout=timeout, extra=arguments['--extra'])
-
+    return crawlers(**input_content, timeout=timeout, extra=arguments['--extra'])
 
 
 if __name__ == '__main__':

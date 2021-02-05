@@ -2,4 +2,4 @@ coverage
 pytest
 httpx
 lxml
-cssselect
+docopt
