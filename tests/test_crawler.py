@@ -13,7 +13,7 @@ from tests.html_response import expected_repo_urls, repo_response
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.acceptance
+@pytest.mark.acceptance()
 @respx.mock
 def test_crawler_main():
     respx.get(GitHubCrawler.BASE_URL + '/search?q=openstack+nova+css&type=Repositories').mock(
@@ -23,7 +23,7 @@ def test_crawler_main():
     assert expected_repo_urls == data
 
 
-@pytest.mark.acceptance
+@pytest.mark.acceptance()
 @patch('crawler.crawlers')
 def test_crawler_main_parameters(mock_github_crawler):
     main(shlex.split(

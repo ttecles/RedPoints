@@ -25,7 +25,7 @@ class GitHubCrawler:
             raise ValueError("Not a valid type")
         proxies = random.choice(self._proxies) if self._proxies else None
         if proxies:
-            proxies = {'http': f'http://{proxies}'}
+            proxies = {f'http://{proxies}': None}
 
         resp = httpx.get(self.BASE_URL + '/search?' + urlencode(dict(q=' '.join(keywords), type=type)),
                          proxies=proxies, timeout=self.timeout)
@@ -60,10 +60,10 @@ class GitHubCrawler:
                 language_stats = {}
                 for li in tree.xpath('//h2[text()="Languages"]/..//li'):
                     try:
-                        aux = [span.text for span in li.cssselect('span')][-2:]
+                        aux = [span.text for span in li.xpath('.//span')][-2:]
                         if aux:
                             language_stats.update({aux[0]: float(aux[1].strip('%'))})
-                    except:
+                    except (ValueError, IndexError):
                         pass
                 fetched.update(url=str(resp.url), extra=dict(owner=owner, language_stats=language_stats))
             else:

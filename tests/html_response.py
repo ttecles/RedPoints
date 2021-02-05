@@ -1099,14 +1099,7 @@ repo_response = """<!DOCTYPE html>
   </body>
 </html>"""
 
-dropbox_cloud_storage_response = """
-
-
-
-
-
-
-<!DOCTYPE html>
+dropbox_cloud_storage_response = """<!DOCTYPE html>
 <html lang="en" data-color-mode="light" data-light-theme="light" data-dark-theme="dark">
   <head>
     <meta charset="utf-8">
@@ -3030,14 +3023,7 @@ dropbox_cloud_storage_response = """
 
 expected_dropbox_data = {'CSS': 52.0, 'JavaScript': 47.2, 'HTML': 0.8}
 
-horizon_dashboard_response = """
-
-
-
-
-
-
-<!DOCTYPE html>
+horizon_dashboard_response = """<!DOCTYPE html>
 <html lang="en" data-color-mode="light" data-light-theme="light" data-dark-theme="dark">
   <head>
     <meta charset="utf-8">

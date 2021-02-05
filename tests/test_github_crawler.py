@@ -73,7 +73,7 @@ def test_GithubCrawler_invalid_type(keywords, proxies):
 
 
 @respx.mock
-def test_GithubCrawler_repo_extra(keywords, proxies):
+def test_GithubCrawler_repo_extra_error(keywords, proxies):
     respx.get(url=GitHubCrawler.BASE_URL + '/search?q=openstack+nova+css&type=Repositories').mock(
         return_value=httpx.Response(200, html=repo_response))
     respx.get(url=GitHubCrawler.BASE_URL + '/atuldjadhav/DropBox-Cloud-Storage').mock(
