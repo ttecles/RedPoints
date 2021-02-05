@@ -30,35 +30,29 @@ def main(argv):
 
     file_input = arguments['INPUT']
     if not os.path.exists(file_input):
-        sys.exit("File not found")
+        raise ValueError("File not found")
 
     timeout = arguments['--timeout']
     if timeout:
         try:
             timeout = float(timeout)
         except:
-            sys.exit("Invalid timeout value")
+            raise ValueError("Invalid timeout value")
 
-    try:
-        with open(file_input, 'r') as json_file:
-            input_content = json.load(json_file)
-    except json.decoder.JSONDecodeError as e:
-        sys.exit(f"JSON parse error {file_input}. {e}")
-    except Exception as e:
-        sys.exit(str(e))
+    with open(file_input, 'r') as json_file:
+        input_content = json.load(json_file)
 
-    try:
-        if arguments['RESOURCE'].lower() == 'github':
-            data = github_crawler(input_content, timeout=timeout)
-        else:
-            data = None
-        if data:
-            pprint(data)
-        else:
-            sys.exit("No data fetched")
-    except Exception as e:
-        sys.exit(str(e))
+    if arguments['RESOURCE'].lower() == 'github':
+        data = github_crawler(input_content, timeout=timeout)
+    else:
+        data = None
+    return data
 
 
 if __name__ == '__main__':
-    main(argv=sys.argv[1:])
+    try:
+        data = main(argv=sys.argv[1:])
+    except Exception as e:
+        sys.exit(str(e))
+    else:
+        pprint(data) if data else print("No data fetched")
