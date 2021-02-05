@@ -21,15 +21,12 @@ from github_crawler import GitHubCrawler
 
 def github_crawler(input_data, timeout):
     crawler = GitHubCrawler(input_data.get('proxies'), timeout=timeout)
-    try:
-        data = crawler.fetch_urls(input_data.get('keywords', None), input_data.get('type', None))
-    except Exception as e:
-        sys.exit(e)
-    pprint(data)
+    data = crawler.fetch_urls(input_data.get('keywords', None), input_data.get('type', None))
+    return data
 
 
-if __name__ == '__main__':
-    arguments = docopt(__doc__)
+def main(argv):
+    arguments = docopt(__doc__, argv=argv)
 
     file_input = arguments['INPUT']
     if not os.path.exists(file_input):
@@ -40,7 +37,7 @@ if __name__ == '__main__':
         try:
             timeout = float(timeout)
         except:
-           sys.exit("Invalid timeout value")
+            sys.exit("Invalid timeout value")
 
     try:
         with open(file_input, 'r') as json_file:
@@ -50,5 +47,18 @@ if __name__ == '__main__':
     except Exception as e:
         sys.exit(str(e))
 
-    if arguments['RESOURCE'].lower() == 'github':
-        github_crawler(input_content, timeout=timeout)
+    try:
+        if arguments['RESOURCE'].lower() == 'github':
+            data = github_crawler(input_content, timeout=timeout)
+        else:
+            data = None
+        if data:
+            pprint(data)
+        else:
+            sys.exit("No data fetched")
+    except Exception as e:
+        sys.exit(str(e))
+
+
+if __name__ == '__main__':
+    main(argv=sys.argv[1:])

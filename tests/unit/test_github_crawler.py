@@ -4,7 +4,8 @@ import pytest
 import responses
 
 from github_crawler import GitHubCrawler
-from tests.html_response import repo_response, issues_response, wikis_response
+from tests.html_response import repo_response, issues_response, wikis_response, expected_repo_urls, \
+    expected_issues_urls, expected_wikis_urls
 
 
 @pytest.fixture
@@ -27,14 +28,7 @@ def test_GithubCrawler_repo(keywords, proxies):
 
     crawler = GitHubCrawler(proxies)
     result = crawler.fetch_urls(keywords, 'Repositories')
-    assert result == [
-        {
-            "url": "https://github.com/atuldjadhav/DropBox-Cloud-Storage"
-        },
-        {
-            "url": "https://github.com/michealbalogun/Horizon-dashboard"
-        }
-    ]
+    assert result == expected_repo_urls
 
 
 @responses.activate
@@ -42,15 +36,8 @@ def test_GithubCrawler_issues(keywords, proxies):
     responses.add(responses.GET, re.compile(GitHubCrawler.BASE_URL + '.*'), body=issues_response, status=200)
 
     crawler = GitHubCrawler(proxies)
-    result = crawler.fetch_urls(keywords, 'issues')
-    assert result == [
-        {
-            "url": "https://github.com/sfPPP/openstack-note/issues/8"
-        },
-        {
-            "url": "https://github.com/moby/moby/issues/19758"
-        }
-    ]
+    result = crawler.fetch_urls(keywords, 'Issues')
+    assert result == expected_issues_urls
 
 
 @responses.activate
@@ -58,12 +45,5 @@ def test_GithubCrawler_wikis(keywords, proxies):
     responses.add(responses.GET, re.compile(GitHubCrawler.BASE_URL + '.*'), body=wikis_response, status=200)
 
     crawler = GitHubCrawler(proxies)
-    result = crawler.fetch_urls(keywords, 'wikis')
-    assert result == [
-        {
-            "url": "https://github.com/vault-team/vault-website/wiki/Quick-installation-guide"
-        },
-        {
-            "url": "https://github.com/marcosaletta/Juno-CentOS7-Guide/wiki/2.-Controller-and-Network-Node-Installation"
-        }
-    ]
+    result = crawler.fetch_urls(keywords, 'Wikis')
+    assert result == expected_wikis_urls

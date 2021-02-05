@@ -1099,6 +1099,14 @@ repo_response = """<!DOCTYPE html>
   </body>
 </html>"""
 
+expected_repo_urls = [
+    {
+        "url": "https://github.com/atuldjadhav/DropBox-Cloud-Storage"
+    },
+    {
+        "url": "https://github.com/michealbalogun/Horizon-dashboard"
+    }
+]
 
 issues_response = """
 
@@ -2337,7 +2345,14 @@ issues_response = """
 </html>
 """
 
-
+expected_issues_urls = [
+    {
+        "url": "https://github.com/sfPPP/openstack-note/issues/8"
+    },
+    {
+        "url": "https://github.com/moby/moby/issues/19758"
+    }
+]
 wikis_response = """
 
 
@@ -3344,3 +3359,15 @@ wikis_response = """
   </body>
 </html>
 """
+
+expected_wikis_urls = [
+        {
+            "url": "https://github.com/vault-team/vault-website/wiki/Quick-installation-guide"
+        },
+        {
+            "url": "https://github.com/marcosaletta/Juno-CentOS7-Guide/wiki/2.-Controller-and-Network-Node-Installation"
+        }
+    ]
+
+
+
