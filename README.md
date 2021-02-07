@@ -1,5 +1,11 @@
 # GitHub Crawler
 
+### Requirements
+Install required packages
+```shell
+pip install -r requirements.txt
+```
+### Usage
 ```shell
 $ python crawler.py --help
 Usage: crawler.py [--timeout SECONDS] [--keyword KEYWORD]... [--proxy PROXY]...
@@ -17,10 +23,9 @@ Options:
                         (you can get a free list of proxies to work with at https://free-proxy-list.net/)
     --type TYPE         the type of object we are searching for (Repositories, Issues and Wikis supported)
     --extra             extra information. Only valid on Repositories type.
-
 ```
 
-You can also import the GitHubCrawler and run the fetch_urls() method:
+You can also import the GitHubCrawler and run the fetch_data() method:
 
 ```python
 from crawlers import GitHubCrawler
