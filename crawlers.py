@@ -34,8 +34,12 @@ class GitHubCrawler:
         if resp.status_code == 200:
             return self._extract_data(resp.content, type_, extra)
 
+    def _parse(self, html, xpath) -> t.Iterator[str]:
+        tree = html_parser.fromstring(html)
+        elements = tree.xpath(xpath)
+        return [self.BASE_URL + e.get('href') for e in elements if e.get('href')]
+
     def _extract_data(self, html, type_, extra):
-        data = []
         urls = self._parse(html, self.TYPES[type_])
         if type_ == 'Repositories' and extra:
             extra = asyncio.run(self._async_get_extra_data(urls))
@@ -68,8 +72,3 @@ class GitHubCrawler:
                         pass
                 fetched.update({resp.url: dict(owner=owner, language_stats=language_stats)})
         return fetched
-
-    def _parse(self, html, xpath) -> t.Iterator[str]:
-        tree = html_parser.fromstring(html)
-        elements = tree.xpath(xpath)
-        return [self.BASE_URL + e.get('href') for e in elements if e.get('href')]
