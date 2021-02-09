@@ -6,8 +6,8 @@ import httpx
 import pytest
 import respx
 
-from crawler import main
 from crawlers import GitHubCrawler
+from main import main
 from tests.html_response import expected_repo_urls, repo_response
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,17 +24,17 @@ def test_crawler_main():
 
 
 @pytest.mark.acceptance()
-@patch('crawler.crawlers')
+@patch('main.fetch_data')
 def test_crawler_main_parameters(mock_github_crawler):
     main(shlex.split(
         f"--timeout 20 --keyword openstack --keyword nova --keyword css --proxy 193.149.225.228:80 --extra"))
 
     mock_github_crawler.assert_called_once_with(keywords=['openstack', 'nova', 'css'], proxies=['193.149.225.228:80'],
-                                                type=GitHubCrawler.TYPES[0], timeout=20, extra=True)
+                                                type='Repositories', timeout=20, extra=True)
 
 
 @pytest.mark.acceptance
-@patch('crawler.crawlers')
+@patch('main.fetch_data')
 def test_crawler_main_parameters_with_type(mock_github_crawler):
     main(shlex.split(
         f"--type Wikis"))

@@ -85,6 +85,7 @@ def test_GithubCrawler_repo_extra_error(keywords, proxies):
     assert result == [
         {
             "url": "https://github.com/atuldjadhav/DropBox-Cloud-Storage",
+            "extra": None
         },
         {
             "url": "https://github.com/michealbalogun/Horizon-dashboard",

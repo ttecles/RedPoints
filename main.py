@@ -1,4 +1,4 @@
-"""Usage: crawler.py [--timeout SECONDS] [--keyword KEYWORD]... [--proxy PROXY]...
+"""Usage: main.py [--timeout SECONDS] [--keyword KEYWORD]... [--proxy PROXY]...
                      [--type TYPE] [--extra] [INPUT]
 
 Collects data from a resource.
@@ -24,7 +24,7 @@ from docopt import docopt
 from crawlers import GitHubCrawler
 
 
-def crawlers(keywords, proxies, type, timeout=None, extra=False):
+def fetch_data(keywords, proxies, type, timeout=None, extra=False):
     crawler = GitHubCrawler(proxies, timeout=timeout)
     data = crawler.fetch_data(keywords, type, extra)
     return data
@@ -57,8 +57,8 @@ def main(argv):
     if arguments['--type']:
         input_content.update(type=arguments['--type'])
     if not input_content['type']:
-        input_content['type'] = GitHubCrawler.TYPES[0]
-    return crawlers(**input_content, timeout=timeout, extra=arguments['--extra'])
+        input_content['type'] = 'Repositories'
+    return fetch_data(**input_content, timeout=timeout, extra=arguments['--extra'])
 
 
 if __name__ == '__main__':

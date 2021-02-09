@@ -9,10 +9,12 @@ from lxml import html as html_parser
 
 class GitHubCrawler:
     BASE_URL = "https://github.com"
-    TYPES = ['Repositories', 'Issues', 'Wikis']
+    TYPES = {'Repositories': '//ul[@class="repo-list"]//a[@data-hydro-click]',
+             'Issues': '//div[@class="issue-list"]//a[@data-hydro-click]',
+             'Wikis': '//*[@id="wiki_search_results"]//a[@data-hydro-click]'}
 
     def __init__(self, proxies: t.List[str], timeout: t.Union[int, float] = None):
-        """ Searches for the keywords using one of the proxies and collects all URLs based on type
+        """ Searches for the keywords using one of the proxies and collects all URLs based on type_
 
         :param proxies: list of proxies to use on fetching data
         :param timeout: timeout used for fetching data
@@ -20,36 +22,35 @@ class GitHubCrawler:
         self._proxies = proxies
         self.timeout = timeout
 
-    def fetch_data(self, keywords: t.List[str], type: str, extra=False):
-        if type not in self.TYPES:
+    def fetch_data(self, keywords: t.List[str], type_: str, extra=False):
+        if type_ not in self.TYPES:
             raise ValueError("Not a valid type")
         proxies = random.choice(self._proxies) if self._proxies else None
         if proxies:
             proxies = {f'http://{proxies}': None}
 
-        resp = httpx.get(self.BASE_URL + '/search?' + urlencode(dict(q=' '.join(keywords), type=type)),
+        resp = httpx.get(self.BASE_URL + '/search', params=dict(q=' '.join(keywords), type=type_),
                          proxies=proxies, timeout=self.timeout)
         if resp.status_code == 200:
-            return self._extract_data(resp.content, type, extra)
+            return self._extract_data(resp.content, type_, extra)
 
-    def _extract_data(self, html, type, extra):
+    def _extract_data(self, html, type_, extra):
         data = []
-        if type == 'Wikis':
-            data = self._parse_wikis(html)
-        elif type == 'Issues':
-            data = self._parse_issues(html)
-        elif type == 'Repositories':
-            data = self._parse_repo(html, extra)
-
+        urls = self._parse(html, self.TYPES[type_])
+        if type_ == 'Repositories' and extra:
+            extra = asyncio.run(self._async_get_extra_data(urls))
+            data = [dict(url=url, extra=extra.get(url)) for url in urls]
+        else:
+            data = [dict(url=url) for url in urls]
         return data
 
     async def _async_get_extra_data(self, urls):
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             tasks = [client.get(url) for url in urls]
             responses = await asyncio.gather(*tasks, return_exceptions=False)
-        data = []
+        fetched = {}
         for resp in responses:
-            fetched = {}
+
             if resp.status_code == 200:
                 tree = html_parser.fromstring(resp.content)
                 e = tree.xpath('//a[@rel="author"]')
@@ -65,26 +66,10 @@ class GitHubCrawler:
                             language_stats.update({aux[0]: float(aux[1].strip('%'))})
                     except (ValueError, IndexError):
                         pass
-                fetched.update(url=str(resp.url), extra=dict(owner=owner, language_stats=language_stats))
-            else:
-                fetched.update(url=str(resp.url))
-            data.append(fetched)
-        return data
+                fetched.update({resp.url: dict(owner=owner, language_stats=language_stats)})
+        return fetched
 
-    def _parse_repo(self, html, extra):
+    def _parse(self, html, xpath) -> t.Iterator[str]:
         tree = html_parser.fromstring(html)
-        elements = tree.xpath('//ul[@class="repo-list"]//a[@data-hydro-click]')
-        urls = iter(self.BASE_URL + e.get('href', None) for e in elements if e.get('href', None))
-        if extra:
-            return asyncio.run(self._async_get_extra_data(urls))
-        return [{'url': url} for url in urls]
-
-    def _parse_issues(self, html):
-        tree = html_parser.fromstring(html)
-        elements = tree.xpath('//div[@class="issue-list"]//a[@data-hydro-click]')
-        return [{'url': self.BASE_URL + e.get('href', None)} for e in elements if e.get('href', None)]
-
-    def _parse_wikis(self, html):
-        tree = html_parser.fromstring(html)
-        elements = tree.xpath('//*[@id="wiki_search_results"]//a[@data-hydro-click]')
-        return [{'url': self.BASE_URL + e.get('href', None)} for e in elements if e.get('href', None)]
+        elements = tree.xpath(xpath)
+        return [self.BASE_URL + e.get('href') for e in elements if e.get('href')]
